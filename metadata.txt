@@ -10,7 +10,7 @@
 name=Geosense Validator
 qgisMinimumVersion=2.0
 description=Validace podrobné mapy
-version=0.1
+version=0.2
 author=Geosense
 email=krupickova.alzbeta@gmail.com
 

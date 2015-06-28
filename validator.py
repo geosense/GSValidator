@@ -5,12 +5,13 @@
 # Authors: Betka & Jachym
 #
 
+__version__ = 0.2
+
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 from qgis.core import *
 import qgis.utils
 
-from enum import Enum
 import json
 import os, sys
 from prettytable import PrettyTable
