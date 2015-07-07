@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# Skript na validaci vstupních dat
+# Script for spatial data validation
 # Authors: Betka & Jachym
 #
 
@@ -9,12 +9,18 @@ __version__ = 0.2
 
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
-from qgis.core import *
-import qgis.utils
+from qgis.core import NULL
 
 import json
+import re
 import os, sys
 from prettytable import PrettyTable
+
+NOT_PROVIDED = 'nezádano'
+MISSING = 'chybí'
+EXTRA = 'navíc'
+NOT_MATCH = 'neodpovídá'
+
 
 class Validator(object):
     """Class for validating features
@@ -24,13 +30,14 @@ class Validator(object):
     :param allowed_values: object with allowed values
     :param where: WHERE statement for feature selection
     """
-    def __init__(self, validator, attributes = None,
-            allowed_values = None, where=None):
+    def __init__(self, validator, attributes=None,
+                 allowed_values=None, where=None, islike=None):
 
         self.__attributes = attributes
         self.__validate_function = validator
         self.__allowed_values = allowed_values
         self.__where = where
+        self.__islike = islike
 
     def validate(self, layer):
         """Validate given features with given method
@@ -41,8 +48,9 @@ class Validator(object):
         features = self.get_features(layer)
 
         errors = self.__validate_function(features,
-                attributes = self.__attributes,
-                allowed_values = self.__allowed_values)
+                                          attributes=self.__attributes,
+                                          allowed_values=self.__allowed_values,
+                                          islike=self.__islike)
 
         return errors
 
@@ -54,26 +62,23 @@ class Validator(object):
         if self.__where:
             qgsexpr = QgsExpression(self.__where)
             qgsreq = QgsFeatureRequest(qgsexpr)
-            features = layer.getFeatures(qgsreq) 
+            features = layer.getFeatures(qgsreq)
         else:
             features = layer.getFeatures()
         return features
 
-def __check_attributes(features, allowed_values, attributes = None):
+def __check_attributes(features, allowed_values,
+                       attributes=None, islike=None,
+                       position=None):
     """Empty proxy function for calling check_attributes with propper parameters
     """
     return check_attributes(features, allowed_values)
 
-
-def __check_is_null(features, attributes = None, allowed_values=None):
-    """Empty proxy function for calling check_is_null with propper parameters
-    """
-    return check_is_null(features, attributes)
-
-def __check_not_null(features, attributes = None, allowed_values=None):
+def __is_like(features, attributes=None, islike=None,
+              allowed_values=None):
     """Empty proxy function for calling check_not_null with propper parameters
     """
-    return check_not_null(features, attributes)
+    return is_like(features, attributes, islike)
 
 
 def validator_factory(rule):
@@ -91,12 +96,11 @@ def validator_factory(rule):
     attributes = None
     allowed_values = None
     where = None
+    islike = None
 
     try:
-        if rule['validator'] == "isnull":
-            validing_function = __check_is_null
-        elif rule['validator'] == "notnull":
-            validing_function = __check_not_null
+        if rule['validator'] == "islike":
+            validing_function = __is_like
         elif rule['validator'] == "allowedvalues":
             validing_function = __check_attributes
     except:
@@ -117,15 +121,18 @@ def validator_factory(rule):
     if rule.has_key('where'):
         where = rule['where']
 
+    if rule.has_key('islike'):
+        islike = rule['islike']
+
 
     validator = Validator(validing_function,
-            attributes = attributes,
-            allowed_values = allowed_values,
-            where = where)
+                          attributes=attributes,
+                          allowed_values=allowed_values,
+                          where=where,
+                          islike=islike)
 
     return validator
 
-    
 
 def get_attributes_validator(attribute, allowed_values):
     """Returns function, which will validate given feature based on
@@ -135,20 +142,53 @@ def get_attributes_validator(attribute, allowed_values):
     def __is_proper_allowedvalue(feature):
         """This function is the one, which will be called for makeing sure,
         feature is all right
+        Error is also when attribute is NULL, then is written "nezadáno"
         """
 
         feature_value = feature[attribute]
         if feature_value not in allowed_values:
             if feature_value == NULL:
-                feature_value = None
-            id = feature['id']
-            if id == NULL:
-                id = None
+                feature_value = NOT_PROVIDED
+            fid = feature['id']
+            if fid == NULL:
+                fid = None
             return feature_value
         else:
             return None
 
-    return __is_proper_allowedvalue
+    def __is_null(feature):
+        """Checking input feature if attribute has filled value.
+           If attribute is NULL
+        """
+
+        value = feature[attribute]
+        if value == NULL:
+            return MISSING
+        else:
+            return None
+
+    def __is_not_null(feature):
+        """Check whether feature is NOT NULL
+        """
+
+        value2 = feature[attribute]
+        if value2 != NULL:
+            return EXTRA
+        else:
+            return None
+
+
+
+    valid_function = None
+
+    if type(allowed_values) == type([]):
+        valid_function = __is_proper_allowedvalue
+    elif allowed_values == "NULL":
+        valid_function = __is_not_null
+    elif allowed_values == "NOTNULL":
+        valid_function = __is_null
+
+    return valid_function
 
 def check_feature_attributes(feature, allowed_values):
     """Checke for all feature attributes
@@ -162,7 +202,7 @@ def check_feature_attributes(feature, allowed_values):
         if checked:
             attributes[attr] = checked
             feature.setValid(False)
-    
+
     return attributes or None
 
 def check_attributes(features, allowed_values):
@@ -177,25 +217,26 @@ def check_attributes(features, allowed_values):
 
     return false_attributes
 
-def check_is_null(features, attributes):
-    """Check, whether given attribute of features is null
-    """
-    return check_not_null(features, attributes, True)
-
-def check_not_null(features, attributes, reverse = False):
-    """Check, whether given attribute of given feature is NOT NULL
+def is_like(features, attributes, islike):
+    """Check, whether choosen attribute fits to declared template
     """
 
     false_features = {}
+    attribute = attributes[0]
+
     for feature in features:
-        for attribute in attributes:
-            value = feature[attribute]
-            if value == NULL:
-                value = None
-            if not value and not reverse:
-                false_features[feature.id()] = {attribute: value}
-            elif reverse and value:
-                false_features[feature.id()] = {attribute: value}
+        value = feature[attribute]
+        reached = 0
+        if value == NULL:
+            value = 'NULL'
+        for pattern in islike:
+            regex = re.compile(pattern)
+            match = regex.search(value)
+            if match != None:
+                reached = 1
+                break
+        if reached == 0:
+            false_features[feature.id()] = {attribute: NOT_MATCH}
 
     return false_features
 
@@ -216,8 +257,6 @@ def merge_errors(old, new):
 def write_errors(errors):
     """Create string with rendered errors
     """
-
-    outstr = ""
 
     columns = ["Feature"]
     for e in errors:
@@ -264,17 +303,17 @@ def validate(rulesfile, outputfile, layer):
             out = open(outputfile, 'w')
         else:
             out = sys.stdout
-        out.write(errors_txt) 
+        out.write(errors_txt)
 
 def main():
     """Main function, collecting necessary data and running the app
     """
 
     #output_file="/tmp/out.txt"
-    # output_file = 'D:/GEOSENSE/TMO/kontrola atributu/vystupy/komunikace_VHA.txt'
+    #output_file='D:/GEOSENSE/TMO/kontrola atributu/vystupy/komunikace_VHA.txt'
     #output = open(output_file, 'w')
 
-    rulesfile = '/home/jachym/src/gs/qgis-scripts/passports/rules.json'
+    rulesfile = 'C:/Users/betka/Desktop/rules_komunikace.json'
     outputfile = '/tmp/errors.txt'
     layer = iface.activeLayer()
 
