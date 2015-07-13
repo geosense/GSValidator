@@ -41,8 +41,12 @@ class GSValidatorDialog(QtGui.QDialog, FORM_CLASS):
         self.setupUi(self)
 
         self.rulesFileButton.clicked.connect(self.selectFile)
+        self.outputFileButton.clicked.connect(self.createFile)
 
     def selectFile(self):
         self.rulesFile.setText(QtGui.QFileDialog.getOpenFileName())
+
+    def createFile(self):
+        self.outputFile.setText(QtGui.QFileDialog.getSaveFileName())
 
 

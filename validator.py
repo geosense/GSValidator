@@ -9,22 +9,23 @@ __version__ = 0.2
 
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
-from qgis.core import NULL
+from qgis.core import *
+from osgeo import ogr
+from cStringIO import StringIO
 
 import json
 import re
 import os, sys
 from prettytable import PrettyTable
 
-NOT_PROVIDED = 'nezádano'
-MISSING = 'chybí'
-EXTRA = 'navíc'
-NOT_MATCH = 'neodpovídá'
+NOT_PROVIDED = u'nezadáno'
+MISSING = u'chybí'
+EXTRA = u'navíc'
+NOT_MATCH = u'neodpovídá'
 
 
 class Validator(object):
     """Class for validating features
-
     :param validator: function, which will do the job
     :param attributes: list of attributes to be checked
     :param allowed_values: object with allowed values
@@ -41,7 +42,6 @@ class Validator(object):
 
     def validate(self, layer):
         """Validate given features with given method
-
         you can specify attribute and allowed values of given attribute as well
         """
 
@@ -68,8 +68,7 @@ class Validator(object):
         return features
 
 def __check_attributes(features, allowed_values,
-                       attributes=None, islike=None,
-                       position=None):
+                       attributes=None, islike=None):
     """Empty proxy function for calling check_attributes with propper parameters
     """
     return check_attributes(features, allowed_values)
@@ -84,7 +83,6 @@ def __is_like(features, attributes=None, islike=None,
 def validator_factory(rule):
     """Creates instances of Validator, based on 'rules' json, which can contain
     following keys:
-
     validator - function, which will validate
     attributes - list of attributes, which will be validated
     attribute - single attribute with same meaning
@@ -281,8 +279,41 @@ def write_errors(errors):
 
     return table.get_string()
 
-def validate(rulesfile, outputfile, layer):
-    """Validate selected layer with given rules file
+def output_layer(layer,errors,err_file):
+    """Create new shapefile layer from selected features (with error) and add new attribute "error_desc" where is written name of attribute and type of error
+    """
+    layer.dataProvider().addAttributes([QgsField('error_desc', QVariant.String)])
+    layer.updateFields()
+
+    provider = layer.dataProvider()
+    writer = QgsVectorFileWriter( err_file, provider.encoding(), provider.fields(),QGis.WKBPolygon, provider.crs() )
+    layer2 = QgsVectorLayer(err_file,'l1','ogr')     
+    features = layer.selectedFeatures();
+        
+    for feature in features:
+        for k in errors.keys():
+            if k == feature.id():
+                error = errors[k]
+                text = [];
+                size = len(error)
+                loop_size = list(range(size))
+                for i in loop_size:                    
+                    key = error.keys()
+                    value = error.values()
+                    string = key[i] + " - "+ value[i] 
+                    text.append(string)
+                all_errors = ', '.join(text)
+                feature['error_desc'] = all_errors 
+                layer.updateFeature(feature)
+                writer.addFeature(feature)
+                break
+    index = provider.fieldNameIndex("error_desc")
+    layer.dataProvider().deleteAttributes([index])
+    layer.updateFields()
+
+
+def validate(rulesfile, outputfile, layer,err_file):
+    """Validate selected layer with given rules file, make output shapefile with errors
     """
 
     rules = json.load(open(rulesfile))
@@ -298,12 +329,17 @@ def validate(rulesfile, outputfile, layer):
         layer.setSelectedFeatures(errors.keys())
         errors_txt = write_errors(errors)
 
+
         out = None
         if outputfile and os.path.isfile(outputfile):
             out = open(outputfile, 'w')
         else:
             out = sys.stdout
-        out.write(errors_txt)
+        #out.write(errors_txt)
+        
+        output_layer(layer,errors,err_file)
+   
+
 
 def main():
     """Main function, collecting necessary data and running the app
@@ -315,9 +351,10 @@ def main():
 
     rulesfile = 'C:/Users/betka/Desktop/rules_komunikace.json'
     outputfile = '/tmp/errors.txt'
+    err_file = 'D:/GEOSENSE/TMO/kontrola atributu/vystupy/komunikace2.shp'
     layer = iface.activeLayer()
 
-    validate(rulesfile, outputfile, layer)
+    validate(rulesfile, outputfile, layer,err_file)
 
 if __name__ == '__console__':
     main()

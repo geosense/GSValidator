@@ -215,7 +215,9 @@ class GSValidator:
             # substitute with your code.
             rulesfile = self.dlg.rulesFile.text()
             layer = self.iface.activeLayer()
+            err_file = self.dlg.outputFile.text()
 
             checked = self.check_input_values(rulesfile, layer)
             if checked:
-                validate(rulesfile, None, layer)
+                validate(rulesfile, None, layer, err_file)
+                self.iface.addVectorLayer(err_file, "errors", "ogr") 
