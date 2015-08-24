@@ -6,7 +6,7 @@
  Validace podrobné mapy
                               -------------------
         begin                : 2015-06-26
-        git sha              : $Format:%H$
+        git sha              : $Format:$
         copyright            : (C) 2015 by Geosense
         email                : krupickova.alzbeta@gmail.com
  ***************************************************************************/
@@ -27,6 +27,7 @@ import resources_rc
 # Import the code for the dialog
 from gs_validate_dialog import GSValidatorDialog
 import os.path
+from qgis.core import NULL, QgsVectorLayer, QgsField, QgsMapLayerRegistry, QgsMapLayer
 
 from validator import validate
 
@@ -187,7 +188,7 @@ class GSValidator:
         msgBox.exec_()
 
 
-    def check_input_values(self, rulesfile, layer):
+    def check_input_values(self, rulesfile, layer, err_file):
 
         if not layer:
             self.__show_input_error(u"Žádná vrstva nebyla vybrána!")
@@ -200,11 +201,58 @@ class GSValidator:
         if not os.path.isfile(rulesfile):
             self.__show_input_error(u"Soubor '%s' neexistuje!" % rulesfile)
             return False
-        
+
+        if not err_file:
+            self.__show_input_error(u"Nebyl zadán výstupní soubor" )
+            return False
+
         return True
 
+    def remove_previous_output(self, err_file):
+        """Removes output and layer in TOC created from previous run of this
+        function.
+        """
+        canvas = self.iface.mapCanvas()
+        layers = canvas.layers()
+
+        for i in layers:
+            if i.name() == "output:errors":
+                QgsMapLayerRegistry.instance().removeMapLayer(i.id())
+            else:
+                pass
+        if os.path.isfile(err_file):
+            os.remove(err_file)
+
+        return True
+
+    def getVectorLayerByName(self, layerName):
+        layerMap = QgsMapLayerRegistry.instance().mapLayers()
+        for name, layer in layerMap.iteritems():
+            if layer.type() == QgsMapLayer.VectorLayer and layer.name() == layerName:
+                if layer.isValid():
+                    return layer
+                else:
+                    return None
+    
     def run(self):
         """Run method that performs all the real work"""
+
+        selectedLayerIndex = -1
+        counter = -1
+
+        layers = self.iface.legendInterface().layers()
+        layer_list = []
+        for layer in layers:
+            if layer.type() == QgsMapLayer.VectorLayer:
+                layer_list.append(layer.name())
+                counter += 1
+            if layer == self.iface.mapCanvas().currentLayer():
+                selectedLayer = layer
+                selectedLayerIndex = counter
+
+        self.dlg.comboBox.clear()
+        self.dlg.comboBox.addItems(layer_list)
+        self.dlg.comboBox.setCurrentIndex(selectedLayerIndex)
         # show the dialog
         self.dlg.show()
         # Run the dialog event loop
@@ -214,10 +262,14 @@ class GSValidator:
             # Do something useful here - delete the line containing pass and
             # substitute with your code.
             rulesfile = self.dlg.rulesFile.text()
-            layer = self.iface.activeLayer()
+
+            layer = self.getVectorLayerByName(self.dlg.comboBox.currentText())
             err_file = self.dlg.outputFile.text()
 
-            checked = self.check_input_values(rulesfile, layer)
+            checked = self.check_input_values(rulesfile, layer, err_file)
             if checked:
+                cleaned = self.remove_previous_output(err_file)
+
                 validate(rulesfile, None, layer, err_file)
-                self.iface.addVectorLayer(err_file, "errors", "ogr") 
+                self.iface.addVectorLayer(err_file, "output:errors", "ogr")
+                self.iface.setActiveLayer(layer)
