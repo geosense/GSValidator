@@ -343,7 +343,10 @@ def validate(rulesfile, outputfile, layer, err_file):
     """Validate selected layer with given rules file, make output shapefile with errors
     """
 
-    rules = json.load(open(rulesfile))
+    #rules = json.load(open(rulesfile))
+    whole_rulefile = json.load(open(rulesfile))
+
+    rules = whole_rulefile.get("rules")
 
     errors = {}
     for rule in rules:

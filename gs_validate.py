@@ -27,6 +27,7 @@ import resources_rc
 # Import the code for the dialog
 from gs_validate_dialog import GSValidatorDialog
 import os.path
+import json
 from qgis.core import NULL, QgsVectorLayer, QgsField, QgsMapLayerRegistry, QgsMapLayer
 
 from validator import validate, AttributeNotFound
@@ -253,6 +254,27 @@ class GSValidator:
         self.dlg.comboBox.clear()
         self.dlg.comboBox.addItems(layer_list)
         self.dlg.comboBox.setCurrentIndex(selectedLayerIndex)
+
+
+        json_list = []
+        name_list = []
+        filename = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'rulefiles')
+        for file_name in os.listdir(filename):
+            if file_name.endswith(".json"):
+                rulefile_path = os.path.join(filename, file_name)
+                whole_rulefile = json.load(open(rulefile_path))
+                if whole_rulefile.get("title") is not None:
+                    json_list.append(whole_rulefile.get("title"))
+                else:
+                    json_list.append(file_name)
+                name_list.append(file_name)
+
+        self.dlg.ruleFileComboBox.clear()
+        self.dlg.ruleFileComboBox.addItems(json_list)
+                 
+
+
+
         # show the dialog
         self.dlg.show()
         # Run the dialog event loop
@@ -262,7 +284,12 @@ class GSValidator:
         if result:
             # Do something useful here - delete the line containing pass and
             # substitute with your code.
-            rulesfile = self.dlg.rulesFile.text()
+            #
+            if self.dlg.checkBox.isChecked():
+                rulesfile = self.dlg.rulesFile.text()
+            else:
+                index = self.dlg.ruleFileComboBox.currentIndex()
+                rulesfile = os.path.join("C:/Users/betka/.qgis2/python/plugins/GSValidator/rulefiles/"+ name_list[index])
 
             layer = self.getVectorLayerByName(self.dlg.comboBox.currentText())
             err_file = self.dlg.outputFile.text()

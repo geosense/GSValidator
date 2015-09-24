@@ -1,0 +1,215 @@
+ {
+    "rules":
+    [
+      {
+            "title": "Číselníkové hodnoty",
+            "validator": "allowedvalues",
+            "allowed_values": {
+                "kategorie" : ["MK IV.tř", "MK III.tř", "MK II.tř", "MK I.tř",
+                      "silnice I.tř", "silnice II.tř", "silnice III.tř",
+                      "UKS", "UK" ],
+                "objekt": ["silnice", "chodník", "tunel", "most", "lávka", "parkování",
+                   "přístup k objektu", "schody", "podchod", "podjezd",
+                   "cyklostezka", "pěší zóna"],
+                "povrch": ["asfalt", "beton", "dlažba", "zatravňovací dlažba", "makadam",
+                    "nezpevněný povrch", "zámková dlažba", "panel", "neurčeno"],
+                "povrch_sta": ["výborný", "vyhovující", "k opravě", "havarijní",
+                    "neurčeno"],
+                "puvod": ["vektorizace ortofotomapy", "znalostní odhad", "geodeticky zaměřeno",
+                  "vektorizace, znalostní odhad", "vektorizace, geod. zaměření",
+                  "znalostní odhad, geod. zaměření", "doplněno z jiných podkladů"]
+            }
+      },
+      { 
+        "title": "Vyplnění požadovaných atributů u všech prvků",
+            "validator": "allowedvalues",
+            "allowed_values": {
+                "plocha" : "NOTNULL",
+                "id_usek" : "NOTNULL"
+            }
+        },
+        {
+            "title": "Silnice I. - III. třídy a MK I -III.tř jsou objekt: mosty, silnice, tunely",
+            "validator": "allowedvalues",
+            "allowed_values": {
+            "kategorie" : ["MK III.tř", "MK II.tř", "MK I.tř",
+                      "silnice I.tř", "silnice II.tř", "silnice III.tř",
+                      "UKS", "UK" ]
+            },
+            "where": "objekt = 'silnice' OR  objekt = 'most'  OR objekt = 'tunel' "
+        },
+        {
+            "title": "Objekty:mosty, silnice, tunely jsou kategorie silnice I. - III. třídy, MK I -III.tř ",
+            "validator": "allowedvalues",
+            "allowed_values": {
+                "objekt": ["silnice", "most", "tunel"]
+            },
+            "where": "kategorie = 'silnice I.tř' OR  kategorie = 'silnice II.tř'  OR kategorie = 'silnice III.tř' OR kategorie = 'MK I.tř' OR kategorie = 'MK II.tř' OR kategorie = 'MK III.tř'"
+        },
+      { 
+        "title": "Zda u silnic I. - III.tř. je vyplněna hodnota usek_rsd",
+            "validator": "allowedvalues",
+            "allowed_values": {
+                "usek_rsd" : "NOTNULL"
+            },
+            "where": "kategorie = 'silnice I.tř' OR  kategorie = 'silnice II.tř'  OR kategorie = 'silnice III.tř'"
+        },
+        {
+            "title": "Chodníky, lávky, ... mají kategorii  MK IV.",
+            "validator": "allowedvalues",
+            "allowed_values": {
+                "kategorie": ["MK IV.tř"]
+            },
+            "where": "objekt= 'chodník' OR  objekt = 'lávka'  OR  objekt = 'parkování' OR  objekt = 'přístup k objektu' OR  objekt = 'schody' OR  objekt = 'podchod' OR  objekt = 'podjezd' OR  objekt = 'cyklostezka' OR  objekt = 'pěší zóna'"
+        },
+        {
+            "title": "ZdaMK IV. jsou objekt = chodník, lávka,...",
+            "validator": "allowedvalues",
+            "allowed_values": {
+                "objekt": ["chodník", "lávka", "parkování",
+                   "přístup k objektu", "schody", "podchod", "podjezd",
+                   "cyklostezka", "pěší zóna"]
+            },
+            "where": "kategorie = 'MK IV.tř' "
+        },
+      { 
+        "title": "Zda objekty co mají mít délku a šířku mají zapsaný údaj",
+            "validator": "allowedvalues",
+            "allowed_values": {
+                "delka" : "NOTNULL",
+                "sirka" : "NOTNULL"
+            },
+            "where": " objekt = 'silnice' OR  objekt = 'tunel' OR  objekt = 'most' OR objekt= 'chodník' OR  objekt = 'lávka'  OR  objekt = 'schody' OR  objekt = 'podchod' OR  objekt = 'podjezd' OR  objekt = 'cyklostezka'"
+        },
+      { 
+        "title": "Zda objekty, co mají mít NULL hodnotu délka a  šířka  ji mají NULL",
+            "validator": "allowedvalues",
+            "allowed_values": {
+                "delka" : "NULL",
+                "sirka" : "NULL"
+            },
+            "where": " objekt = 'parkování' OR  objekt = 'přístup k objektu' OR  objekt = 'pěší zóna' "
+        },
+      { 
+        "title": "Zda je puvod kde je kombinace typu dodefinovat v dalsim atributu",
+            "validator": "allowedvalues",
+            "allowed_values": {
+                "urceni_hr" : "NOTNULL"
+            },
+            "where": " puvod = 'vektorizace, znalostní odhad' OR  puvod = 'vektorizace, geod. zaměření' OR puvod = 'znalostní odhad, geod. zaměření'  "
+        },
+      { 
+        "title": "Zda je urceni_hr prazne u vybranych hodnot atributu",
+            "validator": "allowedvalues",
+            "allowed_values": {
+                "urceni_hr" : "NULL"
+            },
+            "where": " puvod = 'vektorizace ortofotomapy' OR  puvod = 'geodeticky zaměřeno' OR puvod = 'znalostní odhad'"
+        },
+        { 
+         "title": "Zda označení úseku odpovídá kategorii",
+            "validator": "allowedvalues",
+            "allowed_values": {
+                "kategorie" :["silnice I.tř"]
+            },
+            "where": "usek LIKE 'I/%'"
+        },
+        { 
+        "title": "Zda kategorie odpovídá označení úseku",
+            "validator": "islike",
+            "attribute": "usek",
+            "islike": ["^I/"],
+            "where": "kategorie = 'silnice I.tř' "
+        },
+        { 
+         "title": "Zda označení úseku odpovídá kategorii",
+            "validator": "allowedvalues",
+            "allowed_values": {
+                "kategorie" :["silnice II.tř"]
+            },
+            "where": "usek LIKE 'II/%'"
+        },
+        { 
+        "title": "Zda kategorie odpovídá označení úseku",
+            "validator": "islike",
+            "attribute": "usek",
+            "islike": ["^II/"],
+            "where": "kategorie = 'silnice II.tř' "
+        },
+        { 
+         "title": "Zda označení úseku odpovídá kategorii",
+            "validator": "allowedvalues",
+            "allowed_values": {
+                "kategorie" :["silnice III.tř"]
+            },
+            "where": "usek LIKE 'III/%'"
+        },
+        { 
+        "title": "Zda kategorie odpovídá označení úseku",
+            "validator": "islike",
+            "attribute": "usek",
+            "islike": ["^III/"],
+            "where": "kategorie = 'silnice III.tř' "
+        },
+        { 
+         "title": "Zda označení úseku odpovídá kategorii",
+            "validator": "allowedvalues",
+            "allowed_values": {
+                "kategorie" :["MK I.tř"]
+            },
+            "where": "usek LIKE '5/a'"
+        },
+        { 
+        "title": "Zda kategorie odpovídá označení úseku",
+            "validator": "islike",
+            "attribute": "usek",
+            "islike": ["/a$"],
+            "where": "kategorie = 'MK I.tř' "
+        },
+        { 
+         "title": "Zda označení úseku odpovídá kategorii",
+            "validator": "allowedvalues",
+            "allowed_values": {
+                "kategorie" :["MK II.tř"]
+            },
+            "where": "usek LIKE '%/b'"
+        },
+        { 
+        "title": "Zda kategorie odpovídá označení úseku",
+            "validator": "islike",
+            "attribute": "usek",
+            "islike": ["/b$"],
+            "where": "kategorie = 'MK II.tř' "
+        },
+        { 
+         "title": "Zda označení úseku odpovídá kategorii",
+            "validator": "allowedvalues",
+            "allowed_values": {
+                "kategorie" :["MK III.tř"]
+            },
+            "where": "usek LIKE '%/c'"
+        },
+        { 
+        "title": "Zda kategorie odpovídá označení úseku",
+            "validator": "islike",
+            "attribute": "usek",
+            "islike": ["/c$"],
+            "where": "kategorie = 'MK III.tř' "
+        },
+        { 
+         "title": "Zda označení úseku odpovídá kategorii",
+            "validator": "allowedvalues",
+            "allowed_values": {
+                "kategorie" :["MK IV.tř"]
+            },
+            "where": "usek LIKE '%/d' OR usek LIKE '%/p' OR usek LIKE '%/s' "
+        },
+        { 
+        "title": "Zda kategorie odpovídá označení úseku",
+            "validator": "islike",
+            "attribute": "usek",
+            "islike": ["/d$", "/p$", "/s$", "NULL"],
+            "where": "kategorie = 'MK IV.tř' "
+        }
+    ]
+}
