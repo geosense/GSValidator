@@ -29,8 +29,7 @@ from gs_validate_dialog import GSValidatorDialog
 import os.path
 from qgis.core import NULL, QgsVectorLayer, QgsField, QgsMapLayerRegistry, QgsMapLayer
 
-from validator import validate
-
+from validator import validate, AttributeNotFound
 
 class GSValidator:
     """QGIS Plugin Implementation."""
@@ -237,6 +236,7 @@ class GSValidator:
     def run(self):
         """Run method that performs all the real work"""
 
+
         selectedLayerIndex = -1
         counter = -1
 
@@ -257,6 +257,7 @@ class GSValidator:
         self.dlg.show()
         # Run the dialog event loop
         result = self.dlg.exec_()
+        
         # See if OK was pressed
         if result:
             # Do something useful here - delete the line containing pass and
@@ -267,9 +268,19 @@ class GSValidator:
             err_file = self.dlg.outputFile.text()
 
             checked = self.check_input_values(rulesfile, layer, err_file)
+            
             if checked:
                 cleaned = self.remove_previous_output(err_file)
 
-                validate(rulesfile, None, layer, err_file)
-                self.iface.addVectorLayer(err_file, "output:errors", "ogr")
-                self.iface.setActiveLayer(layer)
+                try:
+                    validate(rulesfile, None, layer, err_file)
+                                
+                    self.iface.addVectorLayer(err_file, "output:errors", "ogr")
+                    self.iface.setActiveLayer(layer)
+                except AttributeNotFound, e: 
+                    text = e.message
+                    msgBox = QMessageBox()
+                    msgBox.setText(text)
+                    msgBox.setIcon(QMessageBox.Critical)
+                    msgBox.exec_()
+

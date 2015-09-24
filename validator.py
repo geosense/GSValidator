@@ -17,11 +17,14 @@ import json
 import re
 import os, sys
 
-
 NOT_PROVIDED = u'nezadáno'
 MISSING = u'chybí'
 EXTRA = u'navíc'
 NOT_MATCH = u'neodpovídá'
+
+class AttributeNotFound(Exception):
+    def __init__(self, msg):
+        Exception.__init__(self, msg)
 
 
 class Validator(object):
@@ -59,13 +62,27 @@ class Validator(object):
         """
 
         features = None
-        if self.__where:
+        if self.__where:        
             qgsexpr = QgsExpression(self.__where)
+            if qgsexpr.hasParserError():          
+                raise AttributeNotFound('error in where statement: "%s"' %(self.__where))
+            where_columns = qgsexpr.referencedColumns()
+            fields = layer.pendingFields()
+            layer_columns = []
+            for f in fields:
+                layer_columns.append(f.name())
+
+            for i in where_columns:
+                if i not in layer_columns:
+                    raise AttributeNotFound('error in where statement, where attribute "%s" not in layer' %(i))
+
             qgsreq = QgsFeatureRequest(qgsexpr)
             features = layer.getFeatures(qgsreq)
         else:
             features = layer.getFeatures()
+
         return features
+
 
 def __check_attributes(features, allowed_values,
                        attributes=None, islike=None):
@@ -131,19 +148,33 @@ def validator_factory(rule):
 
     return validator
 
+def check_existency(attribute, feature):
+    """Check if attribute which has to be validated exists in  layer,
+    if doesnt it will raise exception"""
+    attrs = feature.fields()
+    list_of_attrs = []
+    for a in attrs:
+        list_of_attrs.append(a.name())
+    if attribute in list_of_attrs:
+        feature_value = feature[attribute] 
+    else:
+        raise AttributeNotFound('Not found attibute "%s" in validated layer' % (attribute))
+
+    return feature_value
 
 def get_attributes_validator(attribute, allowed_values):
     """Returns function, which will validate given feature based on
     allowed_values and attribute
     """
-
+   
     def __is_proper_allowedvalue(feature):
         """This function is the one, which will be called for makeing sure,
         feature is all right
         Error is also when attribute is NULL, then is written "nezadáno"
         """
 
-        feature_value = feature[attribute]
+        feature_value = check_existency(attribute, feature)
+         
         if feature_value not in allowed_values:
             if feature_value == NULL:
                 feature_value = NOT_PROVIDED
@@ -158,8 +189,8 @@ def get_attributes_validator(attribute, allowed_values):
         """Checking input feature if attribute has filled value.
            If attribute is NULL
         """
-
-        value = feature[attribute]
+        value = check_existency(attribute, feature)
+        value = feature[attribute]        
         if value == NULL:
             return MISSING
         else:
@@ -215,15 +246,16 @@ def check_attributes(features, allowed_values):
 
     return false_attributes
 
+
 def is_like(features, attributes, islike):
     """Check, whether choosen attribute fits to declared template
     """
 
     false_features = {}
     attribute = attributes[0]
-
     for feature in features:
-        value = feature[attribute]
+        value = check_existency(attribute, feature)
+        #value = feature[attribute]
         reached = 0
         if value == NULL:
             value = 'NULL'
@@ -342,5 +374,8 @@ def main():
     validate(rulesfile, outputfile, layer, err_file)
 
 if __name__ == '__console__':
-    main()
+    try:
+        main()
+    except:
+        print "neprobehlo"
     
