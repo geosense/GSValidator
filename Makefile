@@ -39,6 +39,7 @@ LOCALES =
 SOURCES = \
 	__init__.py \
 	gs_validate.py \
+	validator.py \
 	gs_validate_dialog.py
 
 PLUGINNAME = GSValidator
@@ -46,6 +47,7 @@ PLUGINNAME = GSValidator
 PY_FILES = \
 	gs_validate.py \
 	gs_validate_dialog.py \
+	validator.py \
 	__init__.py
 
 UI_FILES = gs_validate_dialog_base.ui
