@@ -166,7 +166,7 @@ class GSValidator:
         icon_path = ':/plugins/GSValidator/icon.png'
         self.add_action(
             icon_path,
-            text=self.tr(u'Validace'),
+            text=self.tr(u'Validace podrobné mapy'),
             callback=self.run,
             parent=self.iface.mainWindow())
 

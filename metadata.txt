@@ -7,7 +7,7 @@
 # This file should be included when you package your plugin.# Mandatory items:
 
 [general]
-name=Geosense Validator
+name=Geosense
 qgisMinimumVersion=2.0
 description=Validace podrobné mapy
 version=0.2
