@@ -1,0 +1,179 @@
+{
+    "title": "pasport svislého značení - tabule - rules",
+    "abstract": "Validace vektorizované vrstvy tabulí dopravního značení dle pravdiel odvodzených z návodu pro vektorizaci",
+    "version": "1.0.0",
+    "rules":
+    [
+      {
+            "title": "Číselníkové hodnoty",
+            "validator": "allowedvalues",
+            "allowed_values": {
+                "kod" : ["A1a", "A1b", "A2a", "A2b", "A3", "A4", "A5a", "A5b", "A6a", "A6b", "A7a", "A7b", "A8", "A9", "A10", "A11", "A12", "A13", "A14", "A15", "A16", "A17", "A18", "A19", "A20", "A21", "A22", "A23", "A24", "A25", "A26", "A27", "A28", "A29", "A30", "A31a", "A31b", "A31c", "A32a", "A32b", "A33", "P1", "P2", "P3", "P4", "P5", "P6", "P7", "P8",  "B1", "B2", "B3a", "B3b", "B4", "B5", "B6", "B7", "B8", "B9", "B10", "B11", "B12", "B13", "B14", "B15", "B16", "B17", "B18", "B19", "B20a", "B20b", "B21a", "B21b", "B22a", "B22b", "B23a", "B23b", "B24a", "B24b", "B25", "B26", "B27", "B28", "B29", "B30", "B31", "B32", "B33", "B34",    "C1", "C2a", "C2b", "C2c", "C2d", "C2e", "C2f", "C3a", "C3b", "C4a", "C4b", "C4c", "C5a", "C5b", "C6a", "C6b", "C7a", "C7b", "C8a", "C8b", "C9a", "C9b", "C10a", "C10b", "C11a", "C11b", "C12a", "C12b", "C13a", "C13b", "C14a", "C15a", "C15b", "IP1a", "IP1b", "IP2", "IP3", "IP4a", "IP4b", "IP5", "IP6", "IP7", "IP8a", "IP8b", "IP9", "IP10a", "IP10b", "IP11a", "IP11b", "IP11c", "IP11d", "IP11e", "IP11f", "IP11g", "IP12", "IP13a", "IP13b", "IP13c", "IP13d", "IP13e", "IP14a", "IP14b", "IP15a", "IP15b", "IP15c", "IP15d", "IP16", "IP17", "IP18a", "IP18b", "IP18c", "IP19", "IP20a",  "IP20b", "IP21", "IP22", "IP23a", "IP23b", "IP24", "IP25a", "IP25b", "IP26a", "IP26b", "IP27a", "IP27b", "IP28", "IP28a", "IP29", "IP30", "IP31a", "IP31b", "IS1a", "IS1b", "IS1c", "IS1d", "IS2a", "IS2b", "IS2c", "IS2d", "IS3a", "IS3b", "IS3c", "IS3d", "IS4a", "IS4b", "IS4c", "IS4d", "IS5", "IS6a", "IS6b", "IS6c", "IS6d", "IS7a", "IS7b", "IS8a", "IS8b", "IS9a", "IS9b", "IS9c", "IS9d", "IS9e", "IS10a", "IS10b", "IS10c", "IS10d", "IS10e", "IS11a", "IS11b", "IS11c", "IS11d", "IS12a", "IS12b", "IS12c", "IS12d", "IS13", "IS14", "IS15a", "IS15b", "IS16a", "IS16b", "IS16c", "IS16d", "IS17", "IS18a", "IS18b", "IS19a", "IS19b", "IS19c", "IS19d", "IS20", "IS21a", "IS21b", "IS21c", "IS21d", "IS22a", "IS22b", "IS22c", "IS22d", "IS22e", "IS22f", "IS23", "IS24a", "IS24b",  "IS24c", "IJ1", "IJ2", "IJ3", "IJ4a", "IJ4b", "IJ4c", "IJ4d", "IJ4e", "IJ5", "IJ6", "IJ7", "IJ8", "IJ9", "IJ10", "IJ11a", "IJ11b", "IJ12", "IJ13", "IJ14a", "IJ14b", "IJ14c", "IJ15", "IJ16", "IJ17a", "IJ17b", "S1", "S2", "S3", "S4", "S5", "S6", "S7", "S8", "S9", "S10", "S11", "S12a", "S12b", "S13", "S14", "S15", "I1", "I2", "I3",          "OST1", "OST2"],
+                "druh" : ["výstražná", "zákazová", "upravující přednost","příkazová", "informativní směrová", "informativní provozní", "informativní jiná", "světelný signál", "zařízení pro provozní informace", "ostatní"],
+                "poradi" : [1,2,3,4,5,6,7],
+                "puvod": ["vektorizace ortofotomapy", "znalostní odhad", "geodeticky zaměřeno"]
+            }
+      },
+      { 
+        "title": "Vyplnění požadovaných atributů u všech prvků",
+            "validator": "allowedvalues",
+            "allowed_values": {
+                "id_kotvy" : "NOTNULL",
+                "jmeno" : "NOTNULL",
+                "kod" : "NOTNULL",
+                "puvod" : "NOTNULL",
+                "poradi" : "NOTNULL"
+            }
+        },
+        { 
+         "title": "Zda je kod_dodadt hodnota ze seznamu",
+            "validator": "allowedvalues",
+            "allowed_values": {
+                "kod_dodat": ["E1", "E2a", "E2b", "E2c", "E2d", "E3a", "E3b", "E4", "E5", "E6", "E7a", "E7b", "E8a", "E8b", "E8c", "E8d", "E8e", "E9", "E10", "E11", "E11a", "E11b", "E12a", "E12b", "E12c", "E13"]
+            },
+            "where": "kod_dodat IS NOT NULL"
+        },
+        { 
+         "title": "Zda kategorie odpovídá kódu",
+            "validator": "allowedvalues",
+            "allowed_values": {
+                "druh" :["výstražná"]
+            },
+            "where": "kod LIKE 'A%'"
+        },
+        { 
+        "title": "Zda kód odpovídá kategorii",
+            "validator": "islike",
+            "attribute": "kod",
+            "islike": ["^A"],
+            "where": "druh = 'výstražná' "
+        },
+        { 
+         "title": "Zda kategorie odpovídá kódu",
+            "validator": "allowedvalues",
+            "allowed_values": {
+                "druh" :["upravující přednost"]
+            },
+            "where": "kod LIKE 'P%'"
+        },
+        { 
+        "title": "Zda kód odpovídá kategorii",
+            "validator": "islike",
+            "attribute": "kod",
+            "islike": ["^P"],
+            "where": "druh = 'upravující přednost' "
+        },
+        { 
+         "title": "Zda kategorie odpovídá kódu",
+            "validator": "allowedvalues",
+            "allowed_values": {
+                "druh" :["zákazová"]
+            },
+            "where": "kod LIKE 'B%'"
+        },
+        { 
+        "title": "Zda kód odpovídá kategorii",
+            "validator": "islike",
+            "attribute": "kod",
+            "islike": ["^B"],
+            "where": "druh = 'zákazová' "
+        },
+        { 
+         "title": "Zda kategorie odpovídá kódu",
+            "validator": "allowedvalues",
+            "allowed_values": {
+                "druh" :["příkazová"]
+            },
+            "where": "kod LIKE 'C%'"
+        },
+        { 
+        "title": "Zda kód odpovídá kategorii",
+            "validator": "islike",
+            "attribute": "kod",
+            "islike": ["^C"],
+            "where": "druh = 'příkazová' "
+        },
+        { 
+         "title": "Zda kategorie odpovídá kódu",
+            "validator": "allowedvalues",
+            "allowed_values": {
+                "druh" :["informativní provozní"]
+            },
+            "where": "kod LIKE 'IP%'"
+        },
+        { 
+        "title": "Zda kód odpovídá kategorii",
+            "validator": "islike",
+            "attribute": "kod",
+            "islike": ["^IP"],
+            "where": "druh = 'informativní provozní' "
+        },
+        { 
+         "title": "Zda kategorie odpovídá kódu",
+            "validator": "allowedvalues",
+            "allowed_values": {
+                "druh" :["informativní směrová"]
+            },
+            "where": "kod LIKE 'IS%'"
+        },
+        { 
+        "title": "Zda kód odpovídá kategorii",
+            "validator": "islike",
+            "attribute": "kod",
+            "islike": ["^IS"],
+            "where": "druh = 'informativní směrová' "
+        },
+        { 
+         "title": "Zda kategorie odpovídá kódu",
+            "validator": "allowedvalues",
+            "allowed_values": {
+                "druh" :["informativní jiná"]
+            },
+            "where": "kod LIKE 'IJ%'"
+        },
+        { 
+        "title": "Zda kód odpovídá kategorii",
+            "validator": "islike",
+            "attribute": "kod",
+            "islike": ["^IJ"],
+            "where": "druh = 'informativní jiná' "
+        },
+        { 
+         "title": "Zda kategorie odpovídá kódu",
+            "validator": "allowedvalues",
+            "allowed_values": {
+                "druh" :["světelný signál"]
+            },
+            "where": "kod LIKE 'S%'"
+        },
+        { 
+        "title": "Zda kód odpovídá kategorii",
+            "validator": "islike",
+            "attribute": "kod",
+            "islike": ["^S"],
+            "where": "druh = 'světelný signál' "
+        },
+        { 
+        "title": "Zda kód odpovídá kategorii",
+            "validator": "islike",
+            "attribute": "kod",
+            "islike": ["^I"],
+            "where": "druh = 'zařízení pro provozní informace' "
+        },
+        { 
+         "title": "Zda kategorie odpovídá kódu",
+            "validator": "allowedvalues",
+            "allowed_values": {
+                "druh" :["ostatní"]
+            },
+            "where": "kod LIKE 'OST%'"
+        },
+        { 
+        "title": "Zda kód odpovídá kategorii",
+            "validator": "islike",
+            "attribute": "kod",
+            "islike": ["^OST"],
+            "where": "druh = 'ostatní' "
+        }
+    ]
+}

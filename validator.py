@@ -291,12 +291,23 @@ def output_layer(layer, errors, err_file):
     """
 
     provider = layer.dataProvider()
-
     fields = provider.fields()
     fields.append(QgsField('error_desc', QVariant.String))
-    writer = QgsVectorFileWriter(err_file, provider.encoding(),
+    if layer.geometryType()== 0:
+        writer = QgsVectorFileWriter(err_file, provider.encoding(),
+                                 fields, QGis.WKBPoint,
+                                 provider.crs())
+    elif layer.geometryType()== 1:
+        writer = QgsVectorFileWriter(err_file, provider.encoding(),
+                                 fields, QGis.WKBLine,
+                                 provider.crs())
+
+    elif layer.geometryType()== 2:
+        writer = QgsVectorFileWriter(err_file, provider.encoding(),
                                  fields, QGis.WKBPolygon,
                                  provider.crs())
+
+    
     layer2 = QgsVectorLayer(err_file, 'l1', 'ogr')
     features = layer.selectedFeatures()
 
@@ -313,8 +324,9 @@ def output_layer(layer, errors, err_file):
                 for i in loop_size:
                     key = error.keys()
                     value = error.values()
-                    string = key[i] + " - " + value[i]
-                    text.append(string)
+                    string2 = ("""%s -  %s""" %(key[i],value[i]))
+                    #string = key[i] + " - " + value[i]
+                    text.append(string2)
                 all_errors = ', '.join(text)
                 errors_edit.append(all_errors)
                 writer.addFeature(feature)
@@ -343,7 +355,6 @@ def validate(rulesfile, outputfile, layer, err_file):
     """Validate selected layer with given rules file, make output shapefile with errors
     """
 
-    #rules = json.load(open(rulesfile))
     whole_rulefile = json.load(open(rulesfile))
 
     rules = whole_rulefile.get("rules")
@@ -364,15 +375,6 @@ def validate(rulesfile, outputfile, layer, err_file):
 def main():
     """Main function, collecting necessary data and running the app
     """
-
-    #output_file="/tmp/out.txt"
-    #output_file='D:/GEOSENSE/TMO/kontrola atributu/vystupy/komunikace_VHA.txt'
-    #output = open(output_file, 'w')
-
-    #rulesfile = 'C:/Users/betka/Desktop/rules_komunikace.json'
-    #outputfile = '/tmp/errors.txt'
-    #err_file = 'D:/GEOSENSE/TMO/kontrola atributu/vystupy/komunikace2.shp'
-    #layer = iface.activeLayer()
 
     validate(rulesfile, outputfile, layer, err_file)
 

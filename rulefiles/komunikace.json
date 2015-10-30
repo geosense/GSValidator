@@ -1,5 +1,5 @@
 {
-    "title": "pasport komunikací 2 - rules",
+    "title": "pasport komunikací geosense - rules",
     "abstract": "Validace vektorizované vrstvy komunikací dle pravdiel odvodzených z návodu pro vektorizaci",
     "version": "1.0.0",
     "rules":
@@ -28,7 +28,11 @@
             "validator": "allowedvalues",
             "allowed_values": {
                 "plocha" : "NOTNULL",
-                "id_usek" : "NOTNULL"
+                "id_usek" : "NOTNULL",
+                "kategorie" : "NOTNULL",
+                "objekt" : "NOTNULL",
+                "povrch" : "NOTNULL",
+                "povrch_sta" : "NOTNULL"
             }
         },
         {
@@ -66,7 +70,7 @@
             "where": "objekt= 'chodník' OR  objekt = 'lávka'  OR  objekt = 'parkování' OR  objekt = 'přístup k objektu' OR  objekt = 'schody' OR  objekt = 'podchod' OR  objekt = 'podjezd' OR  objekt = 'cyklostezka' OR  objekt = 'pěší zóna'"
         },
         {
-            "title": "ZdaMK IV. jsou objekt = chodník, lávka,...",
+            "title": "Zda MK IV. jsou objekt = chodník, lávka,...",
             "validator": "allowedvalues",
             "allowed_values": {
                 "objekt": ["chodník", "lávka", "parkování",
@@ -94,7 +98,7 @@
             "where": " objekt = 'parkování' OR  objekt = 'přístup k objektu' OR  objekt = 'pěší zóna' "
         },
       { 
-        "title": "Zda je puvod kde je kombinace typu dodefinovat v dalsim atributu",
+        "title": "Zda je puvod kde je kombinace typu dodefinovan v dalsim atributu",
             "validator": "allowedvalues",
             "allowed_values": {
                 "urceni_hr" : "NOTNULL"
@@ -160,13 +164,13 @@
             "allowed_values": {
                 "kategorie" :["MK I.tř"]
             },
-            "where": "usek LIKE '5/a'"
+            "where": "usek LIKE '5a'"
         },
         { 
         "title": "Zda kategorie odpovídá označení úseku",
             "validator": "islike",
             "attribute": "usek",
-            "islike": ["/a$"],
+            "islike": ["a$"],
             "where": "kategorie = 'MK I.tř' "
         },
         { 
@@ -175,13 +179,13 @@
             "allowed_values": {
                 "kategorie" :["MK II.tř"]
             },
-            "where": "usek LIKE '%/b'"
+            "where": "usek LIKE '%b'"
         },
         { 
         "title": "Zda kategorie odpovídá označení úseku",
             "validator": "islike",
             "attribute": "usek",
-            "islike": ["/b$"],
+            "islike": ["b$"],
             "where": "kategorie = 'MK II.tř' "
         },
         { 
@@ -190,13 +194,13 @@
             "allowed_values": {
                 "kategorie" :["MK III.tř"]
             },
-            "where": "usek LIKE '%/c'"
+            "where": "usek LIKE '%c'"
         },
         { 
         "title": "Zda kategorie odpovídá označení úseku",
             "validator": "islike",
             "attribute": "usek",
-            "islike": ["/c$"],
+            "islike": ["c$"],
             "where": "kategorie = 'MK III.tř' "
         },
         { 
@@ -205,13 +209,13 @@
             "allowed_values": {
                 "kategorie" :["MK IV.tř"]
             },
-            "where": "usek LIKE '%/d' OR usek LIKE '%/p' OR usek LIKE '%/s' "
+            "where": "usek LIKE '%d' OR usek LIKE '%p' OR usek LIKE '%s' "
         },
         { 
         "title": "Zda kategorie odpovídá označení úseku",
             "validator": "islike",
             "attribute": "usek",
-            "islike": ["/d$", "/p$", "/s$", "NULL"],
+            "islike": ["d$", "p$", "s$", "NULL"],
             "where": "kategorie = 'MK IV.tř' "
         }
     ]

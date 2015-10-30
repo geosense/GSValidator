@@ -1,0 +1,61 @@
+{
+    "title": "pasport svislého značení - kotvy - rules",
+    "abstract": "Validace vektorizované vrstvy kotev dopravního značení dle pravdiel odvodzených z návodu pro vektorizaci",
+    "version": "1.0.0",
+    "rules":
+    [
+      {
+            "title": "Číselníkové hodnoty",
+            "validator": "allowedvalues",
+            "allowed_values": {
+                "ukotveni" : ["samostatný sloupek", "sdílený sloupek", "cizí sloup (jedna tabule)", "cizí sloup (více tabulí)", "na objektu"],
+                "umisteni": ["v zeleni", "v chodníku", "výložník na objektu", "na objektu"],
+                "puvod": ["vektorizace ortofotomapy", "znalostní odhad", "geodeticky zaměřeno"]
+            }
+      },
+      { 
+        "title": "Vyplnění požadovaných atributů u všech prvků",
+            "validator": "allowedvalues",
+            "allowed_values": {
+                "id_kotvy" : "NOTNULL",
+                "id_usek" : "NOTNULL",
+                "zac_evid" : "NOTNULL",
+                "puvod" : "NOTNULL",
+                "umisteni" : "NOTNULL",
+                "ukotveni" : "NOTNULL"
+            }
+        },
+        {
+            "title": "Umístění na objektu/výložník na objektu pro ukotvení na objektu",
+            "validator": "allowedvalues",
+            "allowed_values": {
+            "umisteni" : ["výložník na objektu", "na objektu"]
+            },
+            "where": "ukotveni = 'na objektu'"
+        },
+        {
+            "title": "Ukotvení na objektu pro umístění na objektu/výložník na bjektu ",
+            "validator": "allowedvalues",
+            "allowed_values": {
+                "ukotveni": "na obejktu"
+            },
+            "where": "umisteni = 'výložník na objektu' OR  umisteni = 'na objektu'"
+        },
+        { 
+        "title": "Umístění v zeleni/v chodníku pro ukotvení samostatný sloupek/sdílený sloupek/cizí sloup (jedna tabule)/cizí sloup (více tabulí)",
+            "validator": "allowedvalues",
+            "allowed_values": {
+                "umisteni" : ["v zeleni","v chodníku"]
+            },
+            "where": "ukotveni = 'samostatný sloupek' OR  ukotveni = 'sdílený sloupek'  OR ukotveni = 'cizí sloup (jedna tabule)' OR ukotveni = 'cizí sloup (více tabulí)'"
+        },
+        {
+            "title": "Ukotvení samostatný sloupek/sdílený sloupek/cizí sloup (jedna tabule)/cizí sloup (více tabulí  pro umístění v zeleni/v chodníku ",
+            "validator": "allowedvalues",
+            "allowed_values": {
+                "ukotveni": ["samostatný sloupek", "sdílený sloupek", "cizí sloup (jedna tabule)", "cizí sloup (více tabulí)"]
+            },
+            "where": "umisteni = 'v zeleni' OR  umisteni = 'v chodníku'"
+        }
+    ]
+}
