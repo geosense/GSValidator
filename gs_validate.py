@@ -289,7 +289,8 @@ class GSValidator:
                 rulesfile = self.dlg.rulesFile.text()
             else:
                 index = self.dlg.ruleFileComboBox.currentIndex()
-                rulesfile = os.path.join("C:/Users/betka/.qgis2/python/plugins/GSValidator/rulefiles/"+ name_list[index])
+                directory = os.path.dirname(__file__)
+                rulesfile = os.path.join(directory+'/rulefiles/'+ name_list[index])
 
             layer = self.getVectorLayerByName(self.dlg.comboBox.currentText())
             err_file = self.dlg.outputFile.text()
